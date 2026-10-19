@@ -1,0 +1,16 @@
+LICENSE
+README.md
+pyproject.toml
+src/filecache_sim/__init__.py
+src/filecache_sim/__main__.py
+src/filecache_sim/cache.py
+src/filecache_sim/cli.py
+src/filecache_sim/disk.py
+src/lru_file_cache_sim.egg-info/PKG-INFO
+src/lru_file_cache_sim.egg-info/SOURCES.txt
+src/lru_file_cache_sim.egg-info/dependency_links.txt
+src/lru_file_cache_sim.egg-info/entry_points.txt
+src/lru_file_cache_sim.egg-info/requires.txt
+src/lru_file_cache_sim.egg-info/top_level.txt
+tests/test_cache.py
+tests/test_cli.py
