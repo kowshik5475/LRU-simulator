@@ -8,6 +8,7 @@ from typing import List, Optional
 
 from .cache import LRUFileCache
 from .disk import SimulatedDisk
+from .policies import AdaptiveLRUPolicy
 
 
 def _log(msg: str) -> None:
@@ -27,6 +28,9 @@ def print_stats(cache: LRUFileCache) -> None:
     print(f"   Hits: {s.hits}  Misses: {s.misses}  Hit ratio: {s.hit_ratio * 100:.1f}%")
     print(f"   Evictions: {s.evictions}  Write-backs: {s.write_backs}")
     print(f"   Disk reads: {d.reads}  Disk writes: {d.writes}")
+    diagnostics = cache.policy_diagnostics()
+    if diagnostics.get("policy") != "lru":
+        print("   Policy diagnostics:", diagnostics)
 
 
 def run_command(cache: LRUFileCache, line: str) -> bool:
@@ -69,15 +73,21 @@ def run_command(cache: LRUFileCache, line: str) -> bool:
     return True
 
 
-def demo(capacity: int = 120) -> None:
+def _create_cache(capacity: int, policy_name: str, disk: SimulatedDisk,
+                  on_event=_log) -> LRUFileCache:
+    policy = AdaptiveLRUPolicy(capacity) if policy_name == "adaptive" else None
+    return LRUFileCache(capacity, disk, on_event=on_event, policy=policy)
+
+
+def demo(capacity: int = 120, policy: str = "lru") -> None:
     disk = SimulatedDisk()
     for name, ch, n in [("notes.txt", "x", 40), ("app.log", "y", 50),
                         ("photo.jpg", "z", 60), ("config.ini", "c", 20)]:
         disk.write(name, ch * n)
     disk.reset_counters()  # don't count the initial setup
 
-    cache = LRUFileCache(capacity, disk, on_event=_log)
-    print(f"=== LRU File Cache Demo (capacity {capacity} bytes) ===\n")
+    cache = _create_cache(capacity, policy, disk, on_event=_log)
+    print(f"=== File Cache Demo: {policy} (capacity {capacity} bytes) ===\n")
     steps = [
         "read notes.txt", "read app.log", "read notes.txt", "read photo.jpg",
         "write config.ini NEWCONFIG=1", "read app.log", "read notes.txt", "flush",
@@ -90,9 +100,9 @@ def demo(capacity: int = 120) -> None:
     print_stats(cache)
 
 
-def shell(capacity: int) -> None:
-    cache = LRUFileCache(capacity, SimulatedDisk(), on_event=_log)
-    print(f"LRU file cache shell (capacity {capacity} bytes). Type 'help' for commands.")
+def shell(capacity: int, policy: str = "lru") -> None:
+    cache = _create_cache(capacity, policy, SimulatedDisk(), on_event=_log)
+    print(f"File cache shell ({policy}, capacity {capacity} bytes). Type 'help' for commands.")
     while True:
         try:
             line = input("> ")
@@ -112,18 +122,22 @@ def main(argv: Optional[List[str]] = None) -> int:
     p_demo = sub.add_parser("demo", help="run the scripted demonstration")
     p_demo.add_argument("-c", "--capacity", type=int, default=120,
                         help="cache capacity in bytes (default: 120)")
+    p_demo.add_argument("--policy", choices=("lru", "adaptive"), default="lru",
+                        help="cache policy (default: lru)")
 
     p_shell = sub.add_parser("shell", help="start an interactive shell")
     p_shell.add_argument("-c", "--capacity", type=int, default=100,
                          help="cache capacity in bytes (default: 100)")
+    p_shell.add_argument("--policy", choices=("lru", "adaptive"), default="lru",
+                         help="cache policy (default: lru)")
 
     args = parser.parse_args(argv)
     if args.capacity <= 0:
         parser.error("capacity must be positive")
     if args.command == "demo":
-        demo(args.capacity)
+        demo(args.capacity, args.policy)
     else:
-        shell(args.capacity)
+        shell(args.capacity, args.policy)
     return 0
 
 

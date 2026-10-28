@@ -1,0 +1,47 @@
+{
+  "suite": "custom-lru-adaptive-benchmark",
+  "python_version": "3.13.5 (main, Jul 15 2026, 20:25:40) [GCC 14.2.0]",
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+  "seeds": [
+    2026,
+    2027,
+    2028,
+    2029,
+    2030
+  ],
+  "request_count": 500,
+  "file_count": 100,
+  "hot_set_size": 5,
+  "base_capacity_bytes": 256,
+  "capacity_sweep_bytes": [
+    64,
+    128,
+    256,
+    512
+  ],
+  "workloads": [
+    "sequential_scan",
+    "hot_set",
+    "uniform_random",
+    "skewed_popularity",
+    "changing_hot_set",
+    "mixed_sizes_io"
+  ],
+  "capacity_sweep_workloads": [
+    "hot_set",
+    "mixed_sizes_io"
+  ],
+  "policies": [
+    "lru",
+    "adaptive"
+  ],
+  "simulated_io_parameters": {
+    "read_latency_seconds": 0.005,
+    "write_latency_seconds": 0.01,
+    "read_cost": 1.0,
+    "write_cost": 2.0
+  },
+  "timing_note": "actual_execution_seconds measures Python wall-clock policy+engine execution; simulated_storage_seconds is modeled from disk operation counts and configured latencies. Neither is physical storage benchmark data.",
+  "rows": 140,
+  "benchmark_wall_clock_seconds": 1.0022070810000514
+}

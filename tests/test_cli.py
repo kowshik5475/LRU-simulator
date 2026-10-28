@@ -13,3 +13,11 @@ def test_demo_runs(capsys):
 def test_invalid_capacity():
     with pytest.raises(SystemExit):
         main(["demo", "-c", "0"])
+
+
+def test_adaptive_policy_can_be_selected_from_cli(capsys):
+    assert main(["demo", "--policy", "adaptive", "-c", "120"]) == 0
+    out = capsys.readouterr().out
+    assert "File Cache Demo: adaptive" in out
+    assert "Policy diagnostics:" in out
+    assert "'policy': 'adaptive_lru'" in out

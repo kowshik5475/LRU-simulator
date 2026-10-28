@@ -12,7 +12,8 @@ license = { text = "MIT" }
 dependencies = []
 
 [project.optional-dependencies]
-dev = ["pytest>=7"]
+dev = ["pytest>=7", "fastapi>=0.110", "httpx>=0.27"]
+api = ["fastapi>=0.110", "uvicorn[standard]>=0.27"]
 
 [project.scripts]
 filecache-sim = "filecache_sim.cli:main"
@@ -22,3 +23,4 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["src"]
